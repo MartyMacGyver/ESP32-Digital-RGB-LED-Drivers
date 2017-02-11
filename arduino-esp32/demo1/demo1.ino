@@ -134,4 +134,3 @@ void rainbow(unsigned long delay_ms, unsigned long timeout_ms)
     delay(delay_ms);
   }
 }
-

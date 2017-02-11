@@ -60,4 +60,3 @@ inline rgbVal makeRGBVal(uint8_t r, uint8_t g, uint8_t b)
 #endif
 
 #endif /* WS2812_DRIVER_H */
-

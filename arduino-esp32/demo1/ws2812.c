@@ -39,6 +39,7 @@
 #include "soc/rmt_struct.h"
 
 #define ETS_RMT_CTRL_INUM	18
+
 #define WS2812_CYCLE	225 /* nanoseconds */
 #define RESET		50000 /* nanoseconds */
 #define DURATION	12.5 /* minimum time of a single RMT duration
@@ -46,6 +47,7 @@
 #define DIVIDER		1 /* Any other values cause flickering */
 #define PULSE		((WS2812_CYCLE * 2) / (DURATION * DIVIDER))
 #define MAX_PULSES	32
+
 #define RMTCHANNEL	0
 
 typedef union {
@@ -86,7 +88,6 @@ void ws2812_initRMTChannel(int rmtChannel)
 void ws2812_copy()
 {
   uint16_t i, j, offset, len, bit;
-
 
   offset = ws2812_half * MAX_PULSES;
   ws2812_half = !ws2812_half;
@@ -197,4 +198,3 @@ void ws2812_setColors(uint16_t length, rgbVal *array)
 
   return;
 }
-
