@@ -1,11 +1,19 @@
 # ESP32 Digital RGB LED Drivers
 
-A digital RGB LED (WS2812/SK6813/APA102/NeoPixel/DotStar) driver for the ESP32 
+A digital RGB LED (WS2812/SK6812/NeoPixel//APA102/DotStar) driver for the ESP32 
 
 Based upon the [ESP32 WS2812 driver work by Chris Osborn](https://github.com/FozzTexx/ws2812-demo)
 
-## Work in progress!
+<hr>
+### Things that work currently
 
-For the ESP-IDF SDK, esp-idf/demo1 works
+This currently works well with WS2812/NeoPixel LEDs - I expect SK6812 to work equally well.
 
-For the Arduino-ESP32, arduino-esp32/demo1 works!
+There are working demos for Espressif's IoT Development Framework (esp-idf) and Espressif's Arduino-ESP32 core
+
+<hr>
+### TODO
+
+  - APA102/DotStar support
+  - Better API
+  - More demos
