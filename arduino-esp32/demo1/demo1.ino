@@ -20,34 +20,42 @@
  * THE SOFTWARE.
  */
 
-extern "C"
-{
 #include "ws2812.h"
-}
+
+#define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 
 #define PIXELS 256
 #define PIN 18
 
+int currIdx = 0;
+int prevIxd = 0;
+int pausetime = 500;
+uint8_t MAX_COLOR_VAL = 2;
+const uint16_t NUM_PIXELS = 256;  // <--- modify to suit your configuration
+
+rgbVal pixels[NUM_PIXELS];
+
 void setup() {
   Serial.begin(115200);
   Serial.println("init");
-  delay(2000);
+  for (int i = 0; i < COUNT_OF(pixels); i++) {
+    pixels[i] = makeRGBVal(0, 0, 0);
+  }
   ws2812_init(PIN);
+  //pixels = new rgbVal[NUM_PIXELS];
 }
-
-int pausetime = 40;
-uint8_t MAX_COLOR_VAL = 2;
-
-rgbVal pixels [3];
 
 void loop() {
-      Serial.println("loop");
-      rgbVal color = makeRGBVal(16, 0, 0);
-      pixels[0] = color;
-      pixels[1] = color;
-      pixels[2] = color;
-      ws2812_setColors(3, pixels);
-      delay(pausetime);
+      //Serial.println("loop");
+      rgbVal newColor = makeRGBVal(MAX_COLOR_VAL, MAX_COLOR_VAL, MAX_COLOR_VAL);
+      pixels[prevIxd] = makeRGBVal(0, 0, 0);
+      pixels[currIdx] = newColor;
+      ws2812_setColors(COUNT_OF(pixels), pixels);
+      prevIxd = currIdx;
+      currIdx++;
+      if (currIdx >= COUNT_OF(pixels)) {
+        currIdx = 0;
+      }
+      //delay(pausetime);
 }
-
 
