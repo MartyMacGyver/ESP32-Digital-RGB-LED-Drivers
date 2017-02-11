@@ -22,40 +22,116 @@
 
 #include "ws2812.h"
 
-#define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
-
-#define PIXELS 256
-#define PIN 18
-
-int currIdx = 0;
-int prevIxd = 0;
-int pausetime = 500;
-uint8_t MAX_COLOR_VAL = 2;
+const int DATA_PIN = 18;
 const uint16_t NUM_PIXELS = 256;  // <--- modify to suit your configuration
+uint8_t MAX_COLOR_VAL = 32;
 
-rgbVal pixels[NUM_PIXELS];
+int pausetime = 500;
+
+rgbVal *pixels;
+
+void displayOff() {
+  for (int i = 0; i < NUM_PIXELS; i++) {
+    pixels[i] = makeRGBVal(0, 0, 0);
+  }
+  ws2812_setColors(NUM_PIXELS, pixels);
+}
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("init");
-  for (int i = 0; i < COUNT_OF(pixels); i++) {
-    pixels[i] = makeRGBVal(0, 0, 0);
-  }
-  ws2812_init(PIN);
-  //pixels = new rgbVal[NUM_PIXELS];
+  Serial.println("Initializing...");
+  ws2812_init(DATA_PIN);
+  pixels = (rgbVal*)malloc(sizeof(rgbVal) * NUM_PIXELS);
+  displayOff();
+  Serial.println("Init complete");
+  delay(1000);
 }
 
 void loop() {
-      //Serial.println("loop");
-      rgbVal newColor = makeRGBVal(MAX_COLOR_VAL, MAX_COLOR_VAL, MAX_COLOR_VAL);
+  rainbow(0, 5000);
+  scanner(0, 5000);
+  displayOff();
+}
+
+void scanner(unsigned long delay_ms, unsigned long timeout_ms) {
+  int currIdx = 0;
+  int prevIxd = 0;
+  bool RUN_FOREVER = (timeout_ms == 0 ? true : false);
+  unsigned long start_ms = millis();
+  while (RUN_FOREVER || (millis() - start_ms < timeout_ms)) {
       pixels[prevIxd] = makeRGBVal(0, 0, 0);
-      pixels[currIdx] = newColor;
-      ws2812_setColors(COUNT_OF(pixels), pixels);
+      pixels[currIdx] = makeRGBVal(MAX_COLOR_VAL, MAX_COLOR_VAL, MAX_COLOR_VAL);;
+      ws2812_setColors(NUM_PIXELS, pixels);
       prevIxd = currIdx;
       currIdx++;
-      if (currIdx >= COUNT_OF(pixels)) {
+      if (currIdx >= NUM_PIXELS) {
         currIdx = 0;
       }
-      //delay(pausetime);
+      delay(delay_ms);
+  }
+}
+
+void rainbow(unsigned long delay_ms, unsigned long timeout_ms)
+{
+  const uint8_t color_div = 4;
+  const uint8_t anim_step = 1;
+  const uint8_t anim_max = MAX_COLOR_VAL - anim_step;
+  rgbVal color = makeRGBVal(anim_max, 0, 0);
+  rgbVal color2 = makeRGBVal(anim_max, 0, 0);
+  uint8_t stepVal = 0;
+  uint8_t stepVal2 = 0;
+
+  bool RUN_FOREVER = (timeout_ms == 0 ? true : false);
+  unsigned long start_ms = millis();
+  while (RUN_FOREVER || (millis() - start_ms < timeout_ms)) {
+    color = color2;
+    stepVal = stepVal2;
+
+    for (uint16_t i = 0; i < NUM_PIXELS; i++) {
+      pixels[i] = makeRGBVal(color.r/color_div, color.g/color_div, color.b/color_div);
+
+      if (i == 1) {
+        color2 = color;
+        stepVal2 = stepVal;
+      }
+
+      switch (stepVal) {
+      case 0:
+        color.g += anim_step;
+        if (color.g >= anim_max)
+          stepVal++;
+        break;
+      case 1:
+        color.r -= anim_step;
+        if (color.r == 0)
+          stepVal++;
+        break;
+      case 2:
+        color.b += anim_step;
+        if (color.b >= anim_max)
+          stepVal++;
+        break;
+      case 3:
+        color.g -= anim_step;
+        if (color.g == 0)
+          stepVal++;
+        break;
+      case 4:
+        color.r += anim_step;
+        if (color.r >= anim_max)
+          stepVal++;
+        break;
+      case 5:
+        color.b -= anim_step;
+        if (color.b == 0)
+          stepVal = 0;
+        break;
+      }
+    }
+
+    ws2812_setColors(NUM_PIXELS, pixels);
+
+    delay(delay_ms);
+  }
 }
 
