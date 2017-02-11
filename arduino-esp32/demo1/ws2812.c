@@ -146,7 +146,7 @@ void ws2812_init(int gpioNum)
   ws2812_initRMTChannel(RMTCHANNEL);
 
   RMT.tx_lim_ch[RMTCHANNEL].limit = MAX_PULSES;
-  intr_matrix_set(0, ETS_RMT_INTR_SOURCE, ETS_RMT_CTRL_INUM);
+  intr_matrix_set(xPortGetCoreID(), ETS_RMT_INTR_SOURCE, ETS_RMT_CTRL_INUM);
   ESP_RMT_CTRL_INTRL(ws2812_handleInterrupt, NULL);
   RMT.int_ena.ch0_tx_thr_event = 1;
   RMT.int_ena.ch0_tx_end = 1;
