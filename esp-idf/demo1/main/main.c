@@ -6,14 +6,15 @@
  * This code is placed in the public domain (or CC0 licensed, at your option).
  */
 
+#include "ws2812.h"
+
+#include <esp_system.h>
+#include <nvs_flash.h>
+#include <stdio.h>
+#include <driver/gpio.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <soc/rmt_struct.h>
-#include <esp_system.h>
-#include <nvs_flash.h>
-#include <driver/gpio.h>
-#include <stdio.h>
-#include "ws2812.h"
 
 #define WS2812_PIN	18
 
@@ -21,7 +22,7 @@
 
 void rainbow(void *pvParameters)
 {
-  const uint8_t dim_div = 8;
+  const uint8_t dim_div = 32;
   const uint8_t anim_step = 8;
   const uint8_t anim_max = 256 - anim_step;
   const uint16_t pixel_count = 256; // Number of your "pixels"

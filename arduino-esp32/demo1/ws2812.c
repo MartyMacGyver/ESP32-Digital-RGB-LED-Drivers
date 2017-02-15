@@ -31,24 +31,32 @@
  */
 
 #include "ws2812.h"
-#include "esp32-hal.h"
-#include "esp_intr.h"
-#include "driver/gpio.h"
-#include "driver/periph_ctrl.h"
-#include "freertos/semphr.h"
-#include "soc/rmt_struct.h"
 
-#define ETS_RMT_CTRL_INUM	18
+#if defined(ARDUINO) && ARDUINO >= 100
+  #include "esp32-hal.h"
+  #include "esp_intr.h"
+  #include "driver/gpio.h"
+  #include "driver/periph_ctrl.h"
+  #include "freertos/semphr.h"
+  #include "soc/rmt_struct.h"
+#else
+  #include <esp_intr.h>
+  #include <driver/gpio.h>
+  #include <freertos/FreeRTOS.h>
+  #include <freertos/semphr.h>
+  #include <soc/dport_reg.h>
+  #include <soc/gpio_sig_map.h>
+  #include <soc/rmt_struct.h>
+#endif
 
-#define WS2812_CYCLE	225 /* nanoseconds */
-#define RESET		50000 /* nanoseconds */
-#define DURATION	12.5 /* minimum time of a single RMT duration
-				in nanoseconds based on clock */
-#define DIVIDER		1 /* Any other values cause flickering */
-#define PULSE		((WS2812_CYCLE * 2) / (DURATION * DIVIDER))
-#define MAX_PULSES	32
-
-#define RMTCHANNEL	0
+#define RMTCHANNEL        0
+#define WS2812_CYCLE    225 /* nanoseconds */
+#define RESET         50000 /* nanoseconds */
+#define DURATION       12.5 /* minimum time of a single RMT duration
+                               in nanoseconds based on clock */
+#define DIVIDER           1 /* Any other values cause flickering */
+#define MAX_PULSES       32
+#define PULSE         ((WS2812_CYCLE * 2) / (DURATION * DIVIDER))
 
 typedef union {
   struct {
@@ -63,6 +71,7 @@ typedef union {
 static uint8_t *ws2812_buffer = NULL;
 static uint16_t ws2812_pos, ws2812_len, ws2812_half;
 static xSemaphoreHandle ws2812_sem = NULL;
+static intr_handle_t rmt_intr_handle = NULL;
 static rmtPulsePair ws2812_bits[2];
 
 void ws2812_initRMTChannel(int rmtChannel)
@@ -157,10 +166,7 @@ void ws2812_init(int gpioNum)
   ws2812_bits[1].level1 = 0;
   ws2812_bits[1].duration0 = ws2812_bits[1].duration1 = 2 * PULSE;
 
-  intr_matrix_set(xPortGetCoreID(), ETS_RMT_INTR_SOURCE, ETS_RMT_CTRL_INUM);
-  ESP_RMT_CTRL_INTRL(ws2812_handleInterrupt, NULL);
-  ESP_INTR_ENABLE(ETS_RMT_CTRL_INUM);
-
+  esp_intr_alloc(ETS_RMT_INTR_SOURCE, 0, ws2812_handleInterrupt, NULL, &rmt_intr_handle);
   return;
 }
 
