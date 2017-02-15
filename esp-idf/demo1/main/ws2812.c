@@ -32,14 +32,14 @@
 
 #include "ws2812.h"
 
-#if defined(ARDUINO) && ARDUINO >= 100
+#if defined(ARDUINO)
   #include "esp32-hal.h"
   #include "esp_intr.h"
   #include "driver/gpio.h"
   #include "driver/periph_ctrl.h"
   #include "freertos/semphr.h"
   #include "soc/rmt_struct.h"
-#else
+#elif defined(ESP_PLATFORM)
   #include <esp_intr.h>
   #include <driver/gpio.h>
   #include <freertos/FreeRTOS.h>
