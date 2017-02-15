@@ -142,14 +142,12 @@ void ws2812_init(int gpioNum)
   CLEAR_PERI_REG_MASK(DPORT_PERIP_RST_EN_REG, DPORT_RMT_RST);
 
   PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[gpioNum], 2);
-  gpio_matrix_out(gpioNum, RMT_SIG_OUT0_IDX + RMTCHANNEL, 0, 0);
-  gpio_set_direction(gpioNum, GPIO_MODE_OUTPUT);
+  gpio_matrix_out((gpio_num_t)gpioNum, RMT_SIG_OUT0_IDX + RMTCHANNEL, 0, 0);
+  gpio_set_direction((gpio_num_t)gpioNum, GPIO_MODE_OUTPUT);
 
   ws2812_initRMTChannel(RMTCHANNEL);
 
   RMT.tx_lim_ch[RMTCHANNEL].limit = MAX_PULSES;
-  intr_matrix_set(xPortGetCoreID(), ETS_RMT_INTR_SOURCE, ETS_RMT_CTRL_INUM);
-  ESP_RMT_CTRL_INTRL(ws2812_handleInterrupt, NULL);
   RMT.int_ena.ch0_tx_thr_event = 1;
   RMT.int_ena.ch0_tx_end = 1;
 
@@ -160,6 +158,8 @@ void ws2812_init(int gpioNum)
   ws2812_bits[1].level1 = 0;
   ws2812_bits[1].duration0 = ws2812_bits[1].duration1 = 2 * PULSE;
 
+  intr_matrix_set(xPortGetCoreID(), ETS_RMT_INTR_SOURCE, ETS_RMT_CTRL_INUM);
+  ESP_RMT_CTRL_INTRL(ws2812_handleInterrupt, NULL);
   ESP_INTR_ENABLE(ETS_RMT_CTRL_INUM);
 
   return;
@@ -170,7 +170,7 @@ void ws2812_setColors(uint16_t length, rgbVal *array)
   uint16_t i;
 
   ws2812_len = (length * 3) * sizeof(uint8_t);
-  ws2812_buffer = malloc(ws2812_len);
+  ws2812_buffer = (uint8_t *) malloc(ws2812_len);
 
   for (i = 0; i < length; i++) {
     ws2812_buffer[0 + i * 3] = array[i].g;
