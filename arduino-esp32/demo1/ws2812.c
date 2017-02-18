@@ -49,14 +49,14 @@
   #include <soc/rmt_struct.h>
 #endif
 
-#define RMTCHANNEL        0
-#define WS2812_CYCLE    225 /* nanoseconds */
-#define RESET         50000 /* nanoseconds */
-#define DURATION       12.5 /* minimum time of a single RMT duration
+#define RMTCHANNEL          0
+#define WS2812_CYCLE_NS   225 /* nanoseconds */
+#define RESET_TIME_NS   50000 /* nanoseconds */
+#define RMT_DURATION_NS  12.5 /* minimum time of a single RMT duration
                                in nanoseconds based on clock */
-#define DIVIDER           1 /* Any other values cause flickering */
-#define MAX_PULSES       32
-#define PULSE         ((WS2812_CYCLE * 2) / (DURATION * DIVIDER))
+#define DIVIDER             1 /* Any other values cause flickering */
+#define MAX_PULSES         32
+#define PULSE         ((WS2812_CYCLE_NS * 2) / (RMT_DURATION_NS * DIVIDER))
 
 typedef union {
   struct {
@@ -115,10 +115,11 @@ void ws2812_copy()
     bit = ws2812_buffer[i + ws2812_pos];
     for (j = 0; j < 8; j++, bit <<= 1) {
       RMTMEM.chan[RMTCHANNEL].data32[j + i * 8 + offset].val =
-	ws2812_bits[(bit >> 7) & 0x01].val;
+        ws2812_bits[(bit >> 7) & 0x01].val;
     }
     if (i + ws2812_pos == ws2812_len - 1)
-      RMTMEM.chan[RMTCHANNEL].data32[7 + i * 8 + offset].duration1 += RESET / DURATION;
+      RMTMEM.chan[RMTCHANNEL].data32[7 + i * 8 + offset].duration1 +=
+        RESET_TIME_NS / RMT_DURATION_NS;
   }
 
   for (i *= 8; i < MAX_PULSES; i++)
