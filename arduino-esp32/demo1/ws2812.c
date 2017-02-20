@@ -155,7 +155,7 @@ void copyToRmtBlock_half()
 
     // Handle the reset bit by stretching duration1 for the final bit in the stream
     if (i + ws2812_pos == ws2812_len - 1) {
-      RMTMEM.chan[RMTCHANNEL].data32[i * 8 + offset + 7].duration1 +=
+      RMTMEM.chan[RMTCHANNEL].data32[i * 8 + offset + 7].duration1 =
         ledParams.TRS / (RMT_DURATION_NS * DIVIDER);
       #if DEBUG_WS2812_DRIVER
         snprintf(ws2812_debugBuffer, ws2812_debugBufferSz, "%sRESET ", ws2812_debugBuffer);
