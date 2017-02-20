@@ -68,6 +68,10 @@
       {
         ets_printf("%s", arg);
       }
+      inline void print(const int arg)
+      {
+        ets_printf("%d", arg);
+      }
       inline void println(const char * arg)
       {
         ets_printf("%s\n", arg);
