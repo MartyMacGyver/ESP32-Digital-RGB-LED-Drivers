@@ -40,9 +40,9 @@
   #include "arduinoish.hpp"
 #endif
 
-const int DATA_PIN = 18;
-const uint16_t NUM_PIXELS = 256;  // <--- modify to suit your configuration
-uint8_t MAX_COLOR_VAL = 32;
+const int DATA_PIN = 18; // Avoid using any of the strapping pins on the ESP32
+const uint16_t NUM_PIXELS = 256;  // How many pixels you want to drive
+uint8_t MAX_COLOR_VAL = 32; // Limits brightness
 
 int pausetime = 500;
 
@@ -77,7 +77,6 @@ void setup() {
     dumpDebugBuffer(-1, ws2812_debugBuffer);
   #endif
   Serial.println("Init complete");
-  //delay(1000);
 }
 
 int passes = 0;

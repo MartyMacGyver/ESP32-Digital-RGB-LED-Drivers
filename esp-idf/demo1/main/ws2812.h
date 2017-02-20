@@ -46,8 +46,8 @@ typedef union {
 #define DEBUG_WS2812_DRIVER 0
 
 #if DEBUG_WS2812_DRIVER
-char *      ws2812_debugBuffer;
-const int   ws2812_debugBufferSz = 1024;
+char *    ws2812_debugBuffer;
+const int ws2812_debugBufferSz = 1024;
 #endif
 
 enum led_types {LED_WS2812, LED_WS2812B, LED_SK6812, LED_WS2813};

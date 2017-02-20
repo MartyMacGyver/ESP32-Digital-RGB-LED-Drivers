@@ -52,24 +52,10 @@
   #include <stdio.h>
 #endif
 
-
-// 170 WS2812B chaos, WS2812 bad
-// 175 WS2812B OK, WS2812 bad
-// 200 WS2812B OK, WS2812 bad
-// 225 WS2812B OK, WS2812 bad  (initial)
-// 230 WS2812B OK, WS2812 bad 
-// 235 WS2812B OK, WS2812 OK
-// 240 WS2812B OK, WS2812 OK
-// 245 WS2812B slightly glitchy, WS2812 OK
-// 250 WS2812B chaos, WS2812 chaos
-
-#define WS2812_CYCLE_NS   240 /* nanoseconds */
-
-#define RMTCHANNEL          0
+#define RMTCHANNEL          0 /* There are 8 possible channels */
+#define DIVIDER             4 /* 8 still seems to work, but timings become marginal */
+#define MAX_PULSES         32 /* A channel has a 64 "pulse" buffer - we use half per pass */
 #define RMT_DURATION_NS  12.5 /* minimum time of a single RMT duration based on clock ns */
-#define DIVIDER             1 /* Any other values cause flickering */
-#define MAX_PULSES         32
-#define PULSE  ((WS2812_CYCLE_NS * 2) / (RMT_DURATION_NS * DIVIDER))
 
 typedef struct {
   uint32_t T0H;
@@ -79,11 +65,11 @@ typedef struct {
   uint32_t TRS;
 } timingParams;
 
+timingParams ledParams;
 timingParams ledParams_WS2812  = { .T0H = 350, .T1H = 700, .T0L = 800, .T1L = 600, .TRS =  50000};
 timingParams ledParams_WS2812B = { .T0H = 350, .T1H = 900, .T0L = 900, .T1L = 350, .TRS =  50000};
 timingParams ledParams_SK6812  = { .T0H = 300, .T1H = 600, .T0L = 900, .T1L = 600, .TRS =  80000};
 timingParams ledParams_WS2813  = { .T0H = 350, .T1H = 800, .T0L = 350, .T1L = 350, .TRS = 300000};
-timingParams ledParams;
 
 typedef union {
   struct {
@@ -302,4 +288,3 @@ void ws2812_setColors(uint16_t length, rgbVal *array)
 
   return;
 }
-
