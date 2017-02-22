@@ -32,7 +32,9 @@
 
 #include "ws2812.h"
 
-#define DEBUG 1
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #if defined(ARDUINO)
   #include "esp32-hal.h"
@@ -50,6 +52,10 @@
   #include <soc/gpio_sig_map.h>
   #include <soc/rmt_struct.h>
   #include <stdio.h>
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #define RMTCHANNEL          0 /* There are 8 possible channels */

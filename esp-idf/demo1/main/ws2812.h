@@ -32,10 +32,6 @@
 
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef union {
   struct __attribute__ ((packed)) {
     uint8_t r, g, b;
@@ -62,9 +58,5 @@ inline rgbVal makeRGBVal(uint8_t r, uint8_t g, uint8_t b)
   v.b = b;
   return v;
 }
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* WS2812_DRIVER_H */
