@@ -202,10 +202,6 @@ void ws2812_handleInterrupt(void *arg)
 
 int ws2812_init(int gpioNum, int ledType)
 {
-  #if DEBUG_WS2812_DRIVER
-    ws2812_debugBuffer = (char*)calloc(ws2812_debugBufferSz, sizeof(char));
-  #endif
-
   switch (ledType) {
     case LED_WS2812:
       ledParams = ledParams_WS2812;
@@ -222,6 +218,12 @@ int ws2812_init(int gpioNum, int ledType)
     default:
       return -1;
   }
+
+  #if DEBUG_WS2812_DRIVER
+    ws2812_debugBuffer = (char*)calloc(ws2812_debugBufferSz, sizeof(char));
+  #endif
+
+  ws2812_sem = xSemaphoreCreateBinary();
 
   SET_PERI_REG_MASK(DPORT_PERIP_CLK_EN_REG, DPORT_RMT_CLK_EN);
   CLEAR_PERI_REG_MASK(DPORT_PERIP_RST_EN_REG, DPORT_RMT_RST);
@@ -280,15 +282,10 @@ void ws2812_setColors(uint16_t length, rgbVal *array)
     copyToRmtBlock_half();
   }
 
-
-  ws2812_sem = xSemaphoreCreateBinary();
-
   RMT.conf_ch[RMTCHANNEL].conf1.mem_rd_rst = 1;
   RMT.conf_ch[RMTCHANNEL].conf1.tx_start = 1;
 
   xSemaphoreTake(ws2812_sem, portMAX_DELAY);
-  vSemaphoreDelete(ws2812_sem);
-  ws2812_sem = NULL;
 
   free(ws2812_buffer);
 
