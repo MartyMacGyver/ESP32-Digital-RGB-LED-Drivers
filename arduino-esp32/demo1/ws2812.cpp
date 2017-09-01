@@ -40,12 +40,14 @@ extern "C" {
   #include "esp32-hal.h"
   #include "esp_intr.h"
   #include "driver/gpio.h"
+  #include "driver/rmt.h"
   #include "driver/periph_ctrl.h"
   #include "freertos/semphr.h"
   #include "soc/rmt_struct.h"
 #elif defined(ESP_PLATFORM)
   #include <esp_intr.h>
   #include <driver/gpio.h>
+  #include <driver/rmt.h>
   #include <freertos/FreeRTOS.h>
   #include <freertos/semphr.h>
   #include <soc/dport_reg.h>
@@ -226,9 +228,9 @@ int ws2812_init(int gpioNum, int ledType)
   DPORT_SET_PERI_REG_MASK(DPORT_PERIP_CLK_EN_REG, DPORT_RMT_CLK_EN);
   DPORT_CLEAR_PERI_REG_MASK(DPORT_PERIP_RST_EN_REG, DPORT_RMT_RST);
 
-  PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[gpioNum], 2);
-  gpio_matrix_out((gpio_num_t)gpioNum, RMT_SIG_OUT0_IDX + RMTCHANNEL, 0, 0);
-  gpio_set_direction((gpio_num_t)gpioNum, GPIO_MODE_OUTPUT);
+  rmt_set_pin(static_cast<rmt_channel_t>(RMTCHANNEL),
+              RMT_MODE_TX,
+              static_cast<gpio_num_t>(gpioNum));
 
   initRMTChannel(RMTCHANNEL);
 
@@ -279,7 +281,6 @@ void ws2812_setColors(uint16_t length, rgbVal *array)
     #endif
     copyToRmtBlock_half();
   }
-
 
   ws2812_sem = xSemaphoreCreateBinary();
 
