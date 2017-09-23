@@ -1,3 +1,35 @@
+/*
+ * A driver for the WS2812 RGB LEDs using the RMT peripheral on the ESP32.
+ *
+ * Modifications Copyright (c) 2017 Martin F. Falatic
+ *
+ * Based on public domain code created 19 Nov 2016 by Chris Osborn <fozztexx@fozztexx.com>
+ * http://insentricity.com
+ *
+ * The RMT peripheral on the ESP32 provides very accurate timing of
+ * signals sent to the WS2812 LEDs.
+ *
+ */
+/*
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ 
 #include "ws2812.h"
 
 #include <esp_intr.h>
@@ -125,7 +157,7 @@ void copyToRmtBlock_half()
   for (i *= 8; i < MAX_PULSES; i++) {
     RMTMEM.chan[RMTCHANNEL].data32[i + offset].val = 0;
   }
-  
+
   ws2812_pos += len;
 
 #if DEBUG_WS2812_DRIVER
@@ -193,7 +225,7 @@ int ws2812_init(int gpioNum, int ledType)
   ws2812_bitval_to_rmt_map[0].level1 = 0;
   ws2812_bitval_to_rmt_map[0].duration0 = ledParams.T0H / (RMT_DURATION_NS * DIVIDER);
   ws2812_bitval_to_rmt_map[0].duration1 = ledParams.T0L / (RMT_DURATION_NS * DIVIDER);
-  
+
   // RMT config for WS2812 bit val 1
   ws2812_bitval_to_rmt_map[1].level0 = 1;
   ws2812_bitval_to_rmt_map[1].level1 = 0;
