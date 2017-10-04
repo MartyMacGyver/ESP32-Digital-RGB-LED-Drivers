@@ -1,0 +1,24 @@
+#-----------------------------------------------------------------------------
+# Default overrides used when running `make menuconfig` or `make sdkconfig`
+# for the first time (this has no effect if `sdkconfig` already exists)
+#
+# If you run `make defconfig` settings here WILL change an existing `sdkconfig`
+#
+# Example inits are commented out
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+# Menu: Serial flasher config --> Default serial port
+# CONFIG_ESPTOOLPY_PORT="/dev/ttyUSB0"
+CONFIG_ESPTOOLPY_PORT="COM17"
+
+#-----------------------------------------------------------------------------
+# Menu: Component config --> ESP32-specific --> CPU frequency
+CONFIG_ESP32_DEFAULT_CPU_FREQ_240=y
+CONFIG_ESP32_DEFAULT_CPU_FREQ_MHZ=240
+
+#-----------------------------------------------------------------------------
+# Menu: Component config --> FreeRTOS --> Tick rate (Hz)
+CONFIG_FREERTOS_HZ=1000
+
+#-----------------------------------------------------------------------------
