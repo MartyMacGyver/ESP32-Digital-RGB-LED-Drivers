@@ -218,7 +218,6 @@ void scanners(strand_t * strands[], int numStrands, unsigned long delay_ms, unsi
     Serial.print(")");
     Serial.print(" #");
     Serial.print((uint32_t)scanColors[i].num, HEX);
-    Serial.print(")");
   }
   Serial.print(")");
   Serial.println();
