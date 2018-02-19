@@ -157,6 +157,7 @@ int digitalLeds_initStrands(strand_t strands [], int numStrands)
     if (pState->buf_data == nullptr) {
       return -1;
     }
+    pState->sem = nullptr;
 
     rmt_set_pin(
       static_cast<rmt_channel_t>(pStrand->rmtChannel),
@@ -213,6 +214,14 @@ void digitalLeds_resetPixels(strand_t * pStrand)
 int IRAM_ATTR digitalLeds_updatePixels(strand_t * pStrand)
 {
   digitalLeds_stateData * pState = static_cast<digitalLeds_stateData*>(pStrand->_stateVars);
+
+  if (pState->sem) {
+    // Wait for any previously updating pixels.
+    xSemaphoreTake(pState->sem, portMAX_DELAY);
+    vSemaphoreDelete(pState->sem);
+    pState->sem = nullptr;
+  }
+
   ledParams_t ledParams = ledParamsAll[pStrand->ledType];
 
   // Pack pixels into transmission buffer
@@ -255,10 +264,6 @@ int IRAM_ATTR digitalLeds_updatePixels(strand_t * pStrand)
 
   RMT.conf_ch[pStrand->rmtChannel].conf1.mem_rd_rst = 1;
   RMT.conf_ch[pStrand->rmtChannel].conf1.tx_start = 1;
-
-  xSemaphoreTake(pState->sem, portMAX_DELAY);
-  vSemaphoreDelete(pState->sem);
-  pState->sem = nullptr;
 
   return 0;
 }
