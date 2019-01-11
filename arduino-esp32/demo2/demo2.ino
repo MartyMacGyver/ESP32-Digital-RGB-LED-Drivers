@@ -28,10 +28,11 @@ void setup()
 
 void loop()
 {
+    delay(250);
     pStrand.pixels[stepper] = pixelFromRGBW(55, colord, 0, 0);
 
     stepper++;
-    
+
     if(stepper > 240) {
       stepper = 0;
       colord += 10;
