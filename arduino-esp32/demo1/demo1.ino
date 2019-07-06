@@ -1,7 +1,7 @@
 /* 
  * Demo code for driving digital RGB(W) LEDs using the ESP32's RMT peripheral
  *
- * Modifications Copyright (c) 2017 Martin F. Falatic
+ * Modifications Copyright (c) 2017-2019 Martin F. Falatic
  *
  * Based on public domain code created 19 Nov 2016 by Chris Osborn <fozztexx@fozztexx.com>
  * http://insentricity.com
@@ -37,16 +37,36 @@
   #include "arduinoish.hpp"
 #endif
 
+#define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
+
+
 // **Required** if debugging is enabled in library header
-// TODO: Is there any way to put this in digitalLeds_initStrands() and avoid undefined refs?
+// TODO: Is there any way to put this in digitalLeds_addStrands() and avoid undefined refs?
 #if DEBUG_ESP32_DIGITAL_LED_LIB
   int digitalLeds_debugBufferSz = 1024;
   char * digitalLeds_debugBuffer = static_cast<char*>(calloc(digitalLeds_debugBufferSz, sizeof(char)));
 #endif
 
+
+void espPinMode(int pinNum, int pinDir) {
+  // Enable GPIO32 or 33 as output. Doesn't seem to work though.
+  // https://esp32.com/viewtopic.php?t=9151#p38282
+  if (pinNum == 32 || pinNum == 33) {
+    uint64_t gpioBitMask = (pinNum == 32) ? 1ULL<<GPIO_NUM_32 : 1ULL<<GPIO_NUM_33;
+    gpio_mode_t gpioMode = (pinDir == OUTPUT) ? GPIO_MODE_OUTPUT : GPIO_MODE_INPUT;
+    gpio_config_t io_conf;
+    io_conf.intr_type = GPIO_INTR_DISABLE;
+    io_conf.mode = gpioMode;
+    io_conf.pin_bit_mask = gpioBitMask;
+    io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+    gpio_config(&io_conf);
+  } else pinMode(pinNum, pinDir);
+}
+
 void gpioSetup(int gpioNum, int gpioMode, int gpioVal) {
   #if defined(ARDUINO) && ARDUINO >= 100
-    pinMode (gpioNum, gpioMode);
+    espPinMode(gpioNum, gpioMode);
     digitalWrite (gpioNum, gpioVal);
   #elif defined(ESP_PLATFORM)
     gpio_num_t gpioNumNative = static_cast<gpio_num_t>(gpioNum);
@@ -57,26 +77,35 @@ void gpioSetup(int gpioNum, int gpioMode, int gpioVal) {
   #endif
 }
 
-strand_t STRANDS[] = { // Avoid using any of the strapping pins on the ESP32
-  {.rmtChannel = 1, .gpioNum = 17, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  93,
+strand_t STRANDS[] = { // Avoid using any of the strapping pins on the ESP32, anything >=32, 16, 17... not much left.
+  {.rmtChannel = 0, .gpioNum = 14, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  93,
    .pixels = nullptr, ._stateVars = nullptr},
-  {.rmtChannel = 2, .gpioNum = 18, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  93,
+  {.rmtChannel = 1, .gpioNum = 15, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  93,
    .pixels = nullptr, ._stateVars = nullptr},
-  {.rmtChannel = 3, .gpioNum = 19, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  64,
+  {.rmtChannel = 2, .gpioNum = 26, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  93,
    .pixels = nullptr, ._stateVars = nullptr},
+  {.rmtChannel = 3, .gpioNum = 27, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  93,
+   .pixels = nullptr, ._stateVars = nullptr},
+//  {.rmtChannel = 3, .gpioNum = 19, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  64,
+//   .pixels = nullptr, ._stateVars = nullptr},
 //{.rmtChannel = 0, .gpioNum = 16, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels = 256,
 // .pixels = nullptr, ._stateVars = nullptr},
 //  {.rmtChannel = 0, .gpioNum = 16, .ledType = LED_SK6812W_V1, .brightLimit = 32, .numPixels = 300,
 //   .pixels = nullptr, ._stateVars = nullptr},
-  {.rmtChannel = 0, .gpioNum = 16, .ledType = LED_WS2813_V2, .brightLimit = 32, .numPixels = 300,
-   .pixels = nullptr, ._stateVars = nullptr},
+//  {.rmtChannel = 0, .gpioNum = 16, .ledType = LED_WS2813_V2, .brightLimit = 32, .numPixels = 300,
+//   .pixels = nullptr, ._stateVars = nullptr},
 };
-int STRANDCNT = sizeof(STRANDS)/sizeof(STRANDS[0]);
+
+strand_t STRAND0 = {.rmtChannel = 1, .gpioNum = 14, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  93,
+   .pixels = nullptr, ._stateVars = nullptr};
+
+int STRANDCNT = COUNT_OF(STRANDS);
 
 // Forward declarations
 void rainbow(strand_t *, unsigned long, unsigned long);
 void scanner(strand_t *, unsigned long, unsigned long);
 void dumpDebugBuffer(int, char *);
+
 
 //**************************************************************************//
 int getMaxMalloc(int min_mem, int max_mem) {
@@ -133,6 +162,7 @@ int getMaxMalloc(int min_mem, int max_mem) {
   return max_free;
 }
 
+
 void dumpSysInfo() {
   esp_chip_info_t sysinfo;
   esp_chip_info(&sysinfo);
@@ -145,6 +175,7 @@ void dumpSysInfo() {
   Serial.print("; Revision: r");
   Serial.println((int)sysinfo.revision);
 }
+
 
 void dumpDebugBuffer(int id, char * debugBuffer)
 {
@@ -165,8 +196,9 @@ class Scannerer {
     int currIdx;
   public:
     Scannerer(strand_t *, pixelColor_t);
-    void drawNext();
+    void prepareNext();
 };
+
 
 Scannerer::Scannerer(strand_t * pStrandIn, pixelColor_t maxColorIn)
 {
@@ -177,17 +209,18 @@ Scannerer::Scannerer(strand_t * pStrandIn, pixelColor_t maxColorIn)
   currIdx = 0;
 }
 
-void Scannerer::drawNext()
+
+void Scannerer::prepareNext()
 {
   pStrand->pixels[prevIdx] = minColor;
   pStrand->pixels[currIdx] = maxColor;
-  digitalLeds_updatePixels(pStrand);
   prevIdx = currIdx;
   currIdx++;
   if (currIdx >= pStrand->numPixels) {
     currIdx = 0;
   }
 }
+
 
 void scanners(strand_t * strands[], int numStrands, unsigned long delay_ms, unsigned long timeout_ms)
 {
@@ -224,21 +257,24 @@ void scanners(strand_t * strands[], int numStrands, unsigned long delay_ms, unsi
   unsigned long start_ms = millis();
   while (timeout_ms == 0 || (millis() - start_ms < timeout_ms)) {
     for (i = 0; i < numStrands; i++) {
-      pScanner[i]->drawNext();
+      pScanner[i]->prepareNext();
     }
+    digitalLeds_drawPixels(strands, numStrands);
     delay(delay_ms);
   }
   for (i = 0; i < numStrands; i++) {
     delete pScanner[i];
-    digitalLeds_resetPixels(strands[i]);
   }
+  digitalLeds_resetPixels(strands, numStrands);
 }
+
 
 void scanner(strand_t * pStrand, unsigned long delay_ms, unsigned long timeout_ms)
 {
   strand_t * strands [] = { pStrand };
   scanners(strands, 1, delay_ms, timeout_ms);
 }
+
 
 //**************************************************************************//
 class Rainbower {
@@ -253,8 +289,9 @@ class Rainbower {
     pixelColor_t color2;
   public:
     Rainbower(strand_t *);
-    void drawNext();
+    void prepareNext();
 };
+
 
 Rainbower::Rainbower(strand_t * pStrandIn)
 {
@@ -266,7 +303,8 @@ Rainbower::Rainbower(strand_t * pStrandIn)
   color2 = pixelFromRGBW(anim_max, 0, 0, 0);
 }
 
-void Rainbower::drawNext()
+
+void Rainbower::prepareNext()
 {
   color1 = color2;
   stepVal1 = stepVal2;
@@ -309,8 +347,8 @@ void Rainbower::drawNext()
       break;
     }
   }
-  digitalLeds_updatePixels(pStrand);
 }
+
 
 void rainbows(strand_t * strands[], int numStrands, unsigned long delay_ms, unsigned long timeout_ms)
 {
@@ -334,15 +372,17 @@ void rainbows(strand_t * strands[], int numStrands, unsigned long delay_ms, unsi
   unsigned long start_ms = millis();
   while (timeout_ms == 0 || (millis() - start_ms < timeout_ms)) {
     for (i = 0; i < numStrands; i++) {
-      pRbow[i]->drawNext();
+      pRbow[i]->prepareNext();
     }
+    digitalLeds_drawPixels(strands, numStrands);
     delay(delay_ms);
   }
   for (i = 0; i < numStrands; i++) {
     delete pRbow[i];
-    digitalLeds_resetPixels(strands[i]);
   }
+  digitalLeds_resetPixels(strands, numStrands);
 }
+
 
 void rainbow(strand_t * pStrand, unsigned long delay_ms, unsigned long timeout_ms)
 {
@@ -350,20 +390,55 @@ void rainbow(strand_t * pStrand, unsigned long delay_ms, unsigned long timeout_m
   rainbows(strands, 1, delay_ms, timeout_ms);
 }
 
-//**************************************************************************//
-  //  // print tests
-  //  Serial.println(0xFFFFFFFF, DEC);
-  //  Serial.println(0xFFFFFFFF, HEX);
-  //  Serial.println(0xFFFFFFFF, BIN);
-  //  Serial.println(0x7FFFFFFF, DEC);
-  //  Serial.println(0x7FFFFFFF, HEX);
-  //  Serial.println(0x7FFFFFFF, BIN);
-  //  Serial.println(0x00000000, DEC);
-  //  Serial.println(0x00000000, HEX);
-  //  Serial.println(0x00000000, BIN);
-  //  Serial.println(        -1, DEC);
-  //  Serial.println(        -1, HEX);
-  //  Serial.println(        -1, BIN);
+
+boolean initStrands()
+{
+  /****************************************************************************
+     If you have multiple strands connected, but not all are in use, the
+     GPIO power-on defaults for the unused strand data lines will typically be
+     high-impedance. Unless you are pulling the data lines high or low via a
+     resistor, this will lead to noise on those unused but connected channels
+     and unwanted driving of those unallocated strands.
+     This optional gpioSetup() code helps avoid that problem programmatically.
+  ****************************************************************************/
+
+  digitalLeds_initDriver();
+
+  for (int i = 0; i < STRANDCNT; i++) {
+    gpioSetup(STRANDS[i].gpioNum, OUTPUT, LOW);
+  }
+
+  strand_t * strands[8];
+  for (int i = 0; i < STRANDCNT; i++) {
+    strands[i] = &STRANDS[i];
+  }
+  int rc = digitalLeds_addStrands(strands, STRANDCNT);
+  if (rc) {
+    Serial.print("Init rc = ");
+    Serial.println(rc);
+    return false;
+  }
+
+  for (int i = 0; i < STRANDCNT; i++) {
+    strand_t * pStrand = strands[i];
+    Serial.print("Strand ");
+    Serial.print(i);
+    Serial.print(" = ");
+    Serial.print((uint32_t)(pStrand->pixels), HEX);
+    Serial.println();
+    #if DEBUG_ESP32_DIGITAL_LED_LIB
+      dumpDebugBuffer(-2, digitalLeds_debugBuffer);
+    #endif
+  }
+  Serial.println("Here");
+  return true;
+}
+
+
+// Hacky debugging method
+// espPinMode((gpio_num_t)5, OUTPUT);
+// gpio_set_level((gpio_num_t)5, 0);
+// gpio_set_level((gpio_num_t)5, 1);  gpio_set_level((gpio_num_t)5, 0);
 
 //**************************************************************************//
 void setup()
@@ -373,75 +448,47 @@ void setup()
   dumpSysInfo();
   getMaxMalloc(1*1024, 16*1024*1024);
 
-  /****************************************************************************
-     If you have multiple strands connected, but not all are in use, the
-     GPIO power-on defaults for the unused strand data lines will typically be
-     high-impedance. Unless you are pulling the data lines high or low via a
-     resistor, this will lead to noise on those unused but connected channels
-     and unwanted driving of those unallocated strands.
-     This optional gpioSetup() code helps avoid that problem programmatically.
-  ****************************************************************************/
-  gpioSetup(16, OUTPUT, LOW);
-  gpioSetup(17, OUTPUT, LOW);
-  gpioSetup(18, OUTPUT, LOW);
-  gpioSetup(19, OUTPUT, LOW);
-
-  if (digitalLeds_initStrands(STRANDS, STRANDCNT)) {
+  if (!initStrands()) {
     Serial.println("Init FAILURE: halting");
-    while (true) {};
+    while (true) {
+      delay(100);
+    }
   }
-  for (int i = 0; i < STRANDCNT; i++) {
-    strand_t * pStrand = &STRANDS[i];
-    Serial.print("Strand ");
-    Serial.print(i);
-    Serial.print(" = ");
-    Serial.print((uint32_t)(pStrand->pixels), HEX);
-    Serial.println();
-    #if DEBUG_ESP32_DIGITAL_LED_LIB
-      dumpDebugBuffer(-2, digitalLeds_debugBuffer);
-    #endif
-    digitalLeds_resetPixels(pStrand);
-    #if DEBUG_ESP32_DIGITAL_LED_LIB
-      dumpDebugBuffer(-1, digitalLeds_debugBuffer);
-    #endif
-  }
+  delay(100);
   Serial.println("Init complete");
 }
 
+//**************************************************************************//
 void loop()
 {
-  strand_t * strands [] = { &STRANDS[0], &STRANDS[1], &STRANDS[2], &STRANDS[3] };
+  strand_t * strands [STRANDCNT];
+  for (int i = 0; i < STRANDCNT; i++) {
+    strands[i] = &STRANDS[i];
+  }
 
   int m1 = getMaxMalloc(1*1024, 16*1024*1024);
 
-  scanners(strands, 4, 0, 2000);
-  scanners(strands, 3, 0, 2000);
-  scanners(strands, 2, 0, 2000);
-  scanners(strands, 1, 0, 2000);
-  scanners(strands, 0, 0, 2000);  // NOOP: empty strand array
+  for (int i = STRANDCNT; i > 0; i--) {
+    scanners(strands, i, 0, 2000);
+  }
 
-  rainbows(strands, 4, 0, 4000);
-  rainbows(strands, 3, 0, 4000);
-  rainbows(strands, 2, 0, 4000);
-  rainbows(strands, 1, 0, 4000);
-  rainbows(strands, 0, 0, 4000);  // NOOP: empty strand array
+  for (int i = STRANDCNT; i >= 0; i--) {
+    rainbows(strands, i, 0, 4000);
+  }
 
   int m2 = getMaxMalloc(1*1024, 16*1024*1024);
   assert(m2 >= m1); // Sanity check
-
-  scanner(&STRANDS[2], 1, 2000);
-  scanner(&STRANDS[2], 0, 2000);
-  scanner(&STRANDS[2], 1, 2000); // A tiny delay can smooth things out
-  scanner(&STRANDS[2], 5, 2000);
 
   for (int i = 0; i < STRANDCNT; i++) {
     strand_t * pStrand = &STRANDS[i];
     rainbow(pStrand, 0, 2000);
     scanner(pStrand, 0, 2000);
-    digitalLeds_resetPixels(pStrand);
   }
+  digitalLeds_resetPixels(strands, STRANDCNT);
 
   #if DEBUG_ESP32_DIGITAL_LED_LIB
     dumpDebugBuffer(0, digitalLeds_debugBuffer);
   #endif
 }
+
+//**************************************************************************//

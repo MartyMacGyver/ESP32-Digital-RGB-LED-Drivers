@@ -4,41 +4,46 @@
  * Simplest possible example shows a single strand of NeoPixels. See Demo1 for multiple strands and other devices.
  */
 
-strand_t pStrand = {.rmtChannel = 0, .gpioNum = 16, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels = 240,
+strand_t strand = {.rmtChannel = 0, .gpioNum = 26, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels = 240,
    .pixels = nullptr, ._stateVars = nullptr};
 
 int stepper = 0;
 int colord = 0;
+
 
 void setup()
 {
   Serial.begin(115200);
   Serial.println("Initializing...");
 
-  pinMode (16, OUTPUT);
-  digitalWrite (16, LOW);
+  pinMode (26, OUTPUT);
+  digitalWrite (26, LOW);
 
-  if (digitalLeds_initStrands(&pStrand, 1)) {
+  strand_t * strands [] = { &strand };
+  if (digitalLeds_initDriver()) {
     Serial.println("Init FAILURE: halting");
     while (true) {};
   }
-  
-  digitalLeds_resetPixels(&pStrand);
+  digitalLeds_addStrands(strands, 1);
+
+  digitalLeds_resetPixels(strands, 1);
 }
+
 
 void loop()
 {
-    pStrand.pixels[stepper] = pixelFromRGBW(55, colord, 0, 0);
+  strand.pixels[stepper] = pixelFromRGBW(55, colord, 0, 0);
 
-    stepper++;
-    
-    if(stepper > 240) {
-      stepper = 0;
-      colord += 10;
-    }
+  stepper++;
+  
+  if(stepper > 240) {
+    stepper = 0;
+    colord += 10;
+  }
 
-    if(colord > 60) 
-      colord = 0;
-    
-    digitalLeds_updatePixels(&pStrand);
+  if(colord > 60) 
+    colord = 0;
+  
+  strand_t * strands [] = { &strand };
+  digitalLeds_drawPixels(strands, 1);
 }
