@@ -77,27 +77,26 @@ void gpioSetup(int gpioNum, int gpioMode, int gpioVal) {
   #endif
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"  // It's noisy here with `-Wall`
+
 strand_t STRANDS[] = { // Avoid using any of the strapping pins on the ESP32, anything >=32, 16, 17... not much left.
-  {.rmtChannel = 0, .gpioNum = 14, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  93,
-   .pixels = nullptr, ._stateVars = nullptr},
-  {.rmtChannel = 1, .gpioNum = 15, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  93,
-   .pixels = nullptr, ._stateVars = nullptr},
-  {.rmtChannel = 2, .gpioNum = 26, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  93,
-   .pixels = nullptr, ._stateVars = nullptr},
-  {.rmtChannel = 3, .gpioNum = 27, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  93,
-   .pixels = nullptr, ._stateVars = nullptr},
-//  {.rmtChannel = 3, .gpioNum = 19, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  64,
-//   .pixels = nullptr, ._stateVars = nullptr},
-//{.rmtChannel = 0, .gpioNum = 16, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels = 256,
-// .pixels = nullptr, ._stateVars = nullptr},
-//  {.rmtChannel = 0, .gpioNum = 16, .ledType = LED_SK6812W_V1, .brightLimit = 32, .numPixels = 300,
-//   .pixels = nullptr, ._stateVars = nullptr},
-//  {.rmtChannel = 0, .gpioNum = 16, .ledType = LED_WS2813_V2, .brightLimit = 32, .numPixels = 300,
-//   .pixels = nullptr, ._stateVars = nullptr},
+//  {.rmtChannel = 0, .gpioNum = 14, .ledType = LED_SK6812W_V1, .brightLimit = 24, .numPixels =  144},
+  {.rmtChannel = 0, .gpioNum = 14, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  93},
+  {.rmtChannel = 1, .gpioNum = 15, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  93},
+  {.rmtChannel = 2, .gpioNum = 26, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  93},
+  {.rmtChannel = 3, .gpioNum = 27, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  93},
+//  {.rmtChannel = 3, .gpioNum = 19, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  64},
+//  {.rmtChannel = 0, .gpioNum = 16, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels = 256},
+//  {.rmtChannel = 0, .gpioNum = 16, .ledType = LED_SK6812W_V1, .brightLimit = 32, .numPixels = 300},
+//  {.rmtChannel = 0, .gpioNum = 16, .ledType = LED_WS2813_V2,  .brightLimit = 32, .numPixels = 300},
 };
 
-strand_t STRAND0 = {.rmtChannel = 1, .gpioNum = 14, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  93,
-   .pixels = nullptr, ._stateVars = nullptr};
+//strand_t STRAND0 = {.rmtChannel = 1, .gpioNum = 14, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  93,
+//   .pixels = nullptr, ._stateVars = nullptr};
+
+#pragma GCC diagnostic pop
+
 
 int STRANDCNT = COUNT_OF(STRANDS);
 
@@ -391,6 +390,27 @@ void rainbow(strand_t * pStrand, unsigned long delay_ms, unsigned long timeout_m
 }
 
 
+//**************************************************************************//
+void randomStrands(strand_t * strands[], int numStrands, unsigned long delay_ms, unsigned long timeout_ms)
+{
+  Serial.print("DEMO: random colors, delay = ");
+  Serial.println(delay_ms);
+  uint32_t dimmer = 0x0F0F0F0F;
+  unsigned long start_ms = millis();
+  while (timeout_ms == 0 || (millis() - start_ms < timeout_ms)) {
+    for (int n = 0; n < numStrands; n++) {
+      strand_t * pStrand = strands[n];
+      for (uint16_t i = 0; i < pStrand->numPixels; i++) {
+        pStrand->pixels[i].num = (esp_random() & dimmer);
+      }
+    }
+    digitalLeds_drawPixels(strands, numStrands);
+    delay(delay_ms);
+  }
+}
+
+
+//**************************************************************************//
 boolean initStrands()
 {
   /****************************************************************************
@@ -458,6 +478,7 @@ void setup()
   Serial.println("Init complete");
 }
 
+
 //**************************************************************************//
 void loop()
 {
@@ -467,6 +488,14 @@ void loop()
   }
 
   int m1 = getMaxMalloc(1*1024, 16*1024*1024);
+
+  for (int i = STRANDCNT; i > 0; i--) {
+    randomStrands(strands, i, 0, 1000);
+  }
+
+  for (int i = STRANDCNT; i > 0; i--) {
+    randomStrands(strands, i, 100, 3000);
+  }
 
   for (int i = STRANDCNT; i > 0; i--) {
     scanners(strands, i, 0, 2000);
