@@ -33,5 +33,6 @@
             "+<*.hpp>"
         ],
         "libArchive": false
-    }
+    },
+    "examples": "arduino-esp32/*/*.ino"
 }
