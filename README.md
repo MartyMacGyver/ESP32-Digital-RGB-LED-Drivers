@@ -1,6 +1,4 @@
-# A library for driving digital RGB(W) LEDs using the ESP32's RMT peripheral
-
-Digital RGB(W) LED (WS2812/SK6812/NeoPixel/WS2813/etc.) library for the ESP32
+# A library for driving self-timed digital RGB/RGBW LEDs (WS2812, SK6812, NeoPixel, WS2813, etc.) using the Espressif ESP32 microcontroller's RMT output peripheral
 
 Based upon the [ESP32 WS2812 driver work by Chris Osborn](https://github.com/FozzTexx/ws2812-demo)
 
