@@ -450,7 +450,7 @@ boolean initStrands()
       dumpDebugBuffer(-2, digitalLeds_debugBuffer);
     #endif
   }
-  Serial.println("Here");
+
   return true;
 }
 
