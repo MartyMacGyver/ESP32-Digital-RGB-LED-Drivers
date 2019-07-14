@@ -14,7 +14,7 @@
         "type": "git",
         "url": "https://github.com/MartyMacGyver/ESP32-Digital-RGB-LED-Drivers"
     },
-    "version": "2.0.1",
+    "version": "1.5.1",
     "license": "MIT",
     "homepage": "http://fastled.io",
     "frameworks": "arduino",
