@@ -1,6 +1,6 @@
-# A library for driving digital RGB(W) LEDs using the ESP32's RMT peripheral
+# ESP32 Digital RGB(W) LED Drivers
 
-Digital RGB(W) LED (WS2812/SK6812/NeoPixel/WS2813/etc.) library for the ESP32
+A library for driving self-timed digital RGB/RGBW LEDs (WS2812, SK6812, NeoPixel, WS2813, etc.) using the Espressif ESP32 microcontroller's RMT output peripheral
 
 Based upon the [ESP32 WS2812 driver work by Chris Osborn](https://github.com/FozzTexx/ws2812-demo)
 
@@ -8,7 +8,7 @@ Based upon the [ESP32 WS2812 driver work by Chris Osborn](https://github.com/Foz
 
 ### Notes
 
-The RMT peripheral of the ESP32 is used for controlling up to 8 LED "strands" (in whatever form factor the serially-chained LEDs are placed). These strands are independently controlled and buffered. So far I've tested 4 strands successfully.
+The RMT peripheral of the ESP32 is used for controlling up to 8 LED "strands" (in whatever form factor the serially-chained LEDs are placed). These strands are independently controlled and buffered.
 
 There are working demos for Espressif's IoT Development Framework (esp-idf) and Arduino-ESP32 core. Some demos are ONLY for the ESP IDF (demonstrating C-only techniques). Otherwise, a given demo should be exactly the same on either framework.
 

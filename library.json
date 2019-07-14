@@ -1,0 +1,37 @@
+{
+    "name": "ESP32-Digital-RGB-LED-Drivers",
+    "description": "A library for driving self-timed digital RGB/RGBW LEDs (WS2812, SK6812, NeoPixel, WS2813, etc.) using the Espressif ESP32 microcontroller's RMT output peripheral.",
+    "keywords": "rgb,rgbw,led,rmt,esp32,espressif,arduino,WS2812,SK6812,NeoPixel,WS2813",
+    "authors": [
+        {
+            "name": "Martin F. Falatic",
+            "url": "https://www.falatic.com/",
+            "email": "martin@falatic.com",
+            "maintainer": true
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/MartyMacGyver/ESP32-Digital-RGB-LED-Drivers"
+    },
+    "version": "1.5.1",
+    "license": "MIT",
+    "frameworks": "arduino",
+    "platforms": "espressif32",
+    "export": {
+        "exclude": [
+            "docs",
+            "extras"
+        ]
+    },
+    "build": {
+        "srcFilter": [
+            "+<*.c>",
+            "+<*.cpp>",
+            "+<*.h>",
+            "+<*.hpp>"
+        ],
+        "libArchive": false
+    },
+    "examples": "arduino-esp32/*/*.ino"
+}
