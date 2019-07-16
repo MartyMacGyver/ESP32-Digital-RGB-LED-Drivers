@@ -3,7 +3,7 @@
  *
  * Modifications Copyright (c) 2017-2019 Martin F. Falatic
  * 
- * Some portions were modified using FastLED's ClocklessController as a reference
+ * Portions modified using FastLED's ClocklessController as a reference
  *   Copyright (c) 2018 Samuel Z. Guyer
  *   Copyright (c) 2017 Thomas Basler
  *

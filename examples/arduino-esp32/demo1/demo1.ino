@@ -1,5 +1,5 @@
 /* 
- * Demo code for driving digital RGB(W) LEDs using the ESP32's RMT peripheral
+ * Demo code for driving multiple digital RGB(W) strands using esp32_digital_led_lib
  *
  * Modifications Copyright (c) 2017-2019 Martin F. Falatic
  *
@@ -7,6 +7,7 @@
  * http://insentricity.com
  *
  */
+
 /* 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,8 +38,8 @@
   #include "arduinoish.hpp"
 #endif
 
-#define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 
+#define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 
 // **Required** if debugging is enabled in library header
 // TODO: Is there any way to put this in digitalLeds_addStrands() and avoid undefined refs?
@@ -49,7 +50,8 @@
 
 
 void espPinMode(int pinNum, int pinDir) {
-  // Enable GPIO32 or 33 as output. Doesn't seem to work though.
+  // Enable GPIO32 or 33 as output. Device-dependent
+  // (only works if these aren't used for external XTAL).
   // https://esp32.com/viewtopic.php?t=9151#p38282
   if (pinNum == 32 || pinNum == 33) {
     uint64_t gpioBitMask = (pinNum == 32) ? 1ULL<<GPIO_NUM_32 : 1ULL<<GPIO_NUM_33;

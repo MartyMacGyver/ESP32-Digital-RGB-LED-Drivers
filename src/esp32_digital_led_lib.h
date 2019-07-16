@@ -2,11 +2,16 @@
  * Library for driving digital RGB(W) LEDs using the ESP32's RMT peripheral
  *
  * Modifications Copyright (c) 2017-2019 Martin F. Falatic
+ * 
+ * Portions modified using FastLED's ClocklessController as a reference
+ *   Copyright (c) 2018 Samuel Z. Guyer
+ *   Copyright (c) 2017 Thomas Basler
  *
  * Based on public domain code created 19 Nov 2016 by Chris Osborn <fozztexx@fozztexx.com>
  * http://insentricity.com
  *
  */
+
 /* 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
