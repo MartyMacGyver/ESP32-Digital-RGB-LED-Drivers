@@ -135,6 +135,38 @@ static intr_handle_t gRmtIntrHandle = nullptr;
 static int gToProcess = 0;
 
 
+void espPinMode(int pinNum, int pinDir) {
+  // Enable GPIO32 or 33 as output. Device-dependent
+  // (only works if these aren't used for external XTAL).
+  // https://esp32.com/viewtopic.php?t=9151#p38282
+  if (pinNum == 32 || pinNum == 33) {
+    uint64_t gpioBitMask = (pinNum == 32) ? 1ULL<<GPIO_NUM_32 : 1ULL<<GPIO_NUM_33;
+    gpio_mode_t gpioMode = (pinDir == OUTPUT) ? GPIO_MODE_OUTPUT : GPIO_MODE_INPUT;
+    gpio_config_t io_conf;
+    io_conf.intr_type = GPIO_INTR_DISABLE;
+    io_conf.mode = gpioMode;
+    io_conf.pin_bit_mask = gpioBitMask;
+    io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+    gpio_config(&io_conf);
+  } else pinMode(pinNum, pinDir);
+}
+
+
+void gpioSetup(int gpioNum, int gpioMode, int gpioVal) {
+  #if defined(ARDUINO) && ARDUINO >= 100
+    espPinMode(gpioNum, gpioMode);
+    digitalWrite (gpioNum, gpioVal);
+  #elif defined(ESP_PLATFORM)
+    gpio_num_t gpioNumNative = static_cast<gpio_num_t>(gpioNum);
+    gpio_mode_t gpioModeNative = static_cast<gpio_mode_t>(gpioMode);
+    gpio_pad_select_gpio(gpioNumNative);
+    gpio_set_direction(gpioNumNative, gpioModeNative);
+    gpio_set_level(gpioNumNative, gpioVal);
+  #endif
+}
+
+
 int digitalLeds_initDriver()
 {
   #if DEBUG_ESP32_DIGITAL_LED_LIB

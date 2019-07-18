@@ -14,7 +14,7 @@
         "type": "git",
         "url": "https://github.com/MartyMacGyver/ESP32-Digital-RGB-LED-Drivers"
     },
-    "version": "1.5.3",
+    "version": "1.5.4",
     "license": "MIT",
     "frameworks": "arduino",
     "platforms": "espressif32",

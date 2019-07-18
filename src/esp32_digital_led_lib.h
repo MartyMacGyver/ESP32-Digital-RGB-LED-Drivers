@@ -113,6 +113,9 @@ const ledParams_t ledParamsAll[] = {  // Still must match order of `led_types`
   [LED_SK6812W_V1] = { .bytesPerPixel = 4, .T0H = 300, .T1H = 600, .T0L = 900, .T1L = 600, .TRS =  80000}, // Various, all consistent
 };
 
+extern void espPinMode(int pinNum, int pinDir);
+extern void gpioSetup(int gpioNum, int gpioMode, int gpioVal);
+
 extern int digitalLeds_initDriver();
 extern int digitalLeds_addStrands(strand_t * strands [], int numStrands);
 extern int digitalLeds_removeStrands(strand_t * strands [], int numStrands);
