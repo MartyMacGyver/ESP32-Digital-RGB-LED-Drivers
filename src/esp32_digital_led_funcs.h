@@ -28,8 +28,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef ESP32_DIGITAL_LED_FUNCS_H
-#define ESP32_DIGITAL_LED_FUNCS_H
+#ifndef ESP32_DIGITAL_LED_FUNCTIONS_H
+#define ESP32_DIGITAL_LED_FUNCTIONS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,4 +46,4 @@ void rainbow(strand_t * pStrand, unsigned long delay_ms, unsigned long timeout_m
 }
 #endif
 
-#endif /* ESP32_DIGITAL_LED_FUNCS_H */
+#endif /* ESP32_DIGITAL_LED_FUNCTIONS_H */

@@ -40,6 +40,7 @@
 #include "esp32_digital_led_lib.h"
 #include "esp32_digital_led_funcs.h"
 
+
 #define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 
 //**************************************************************************//
@@ -80,7 +81,7 @@ void randomStrands(strand_t * strands[], int numStrands, unsigned long delay_ms,
     for (int n = 0; n < numStrands; n++) {
       strand_t * pStrand = strands[n];
       for (uint16_t i = 0; i < pStrand->numPixels; i++) {
-        pStrand->pixels[i].num = (esp_random() & dimmer);
+        pStrand->pixels[i].raw32 = (esp_random() & dimmer);
       }
     }
     digitalLeds_drawPixels(strands, numStrands);
@@ -153,7 +154,7 @@ void scanners(strand_t * strands[], int numStrands, unsigned long delay_ms, unsi
     Serial.print((uint32_t)pScanner[i], HEX);
     Serial.print(")");
     Serial.print(" #");
-    Serial.print((uint32_t)scanColors[i].num, HEX);
+    Serial.print((uint32_t)scanColors[i].raw32, HEX);
   }
   Serial.print(")");
   Serial.println();

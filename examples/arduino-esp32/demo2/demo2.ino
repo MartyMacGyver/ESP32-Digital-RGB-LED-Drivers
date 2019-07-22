@@ -30,6 +30,7 @@
 
 #include "esp32_digital_led_lib.h"
 #include "esp32_digital_led_funcs.h"
+#include "fireworks_effects.h"
 
 
 #define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
@@ -39,13 +40,15 @@
 
 //strand_t strand = {.rmtChannel = 0, .gpioNum = 26, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels = 64};
 strand_t strand = {.rmtChannel = 0, .gpioNum = 27, .ledType = LED_SK6812W_V1, .brightLimit = 64, .numPixels = 144};
+
 strand_t * STRANDS [] = { &strand };
+
 int STRANDCNT = COUNT_OF(STRANDS); 
+
 #pragma GCC diagnostic pop
 
 
-
-
+FireworksEffects * fweffects;
 
 //**************************************************************************//
 void setup()
@@ -73,13 +76,27 @@ void setup()
     while (true) {};
   }
   digitalLeds_resetPixels(STRANDS, STRANDCNT);
-}
 
+  fweffects = new FireworksEffects(&strand);
+
+  
+//  pixelColor_t ct;
+//  ct = pixelFromRGB(0x12, 0x34, 0x56);
+//  Serial.println(ct.raw32, HEX);
+//  ct = pixelFromRGBW(0x12, 0x34, 0x56, 0x78);
+//  Serial.println(ct.raw32, HEX);
+//  while (true) {
+//    delay(1000);
+//  }
+}
 
 //**************************************************************************//
 void loop()
 {
-//  randomStrands(STRANDS, STRANDCNT, 200, 10000);
-  rainbows(STRANDS, STRANDCNT, 1, 0);
-  //simpleStepper(STRANDS, STRANDCNT, 0, 0);
+  // simpleStepper(STRANDS, STRANDCNT, 0, 0);
+  // randomStrands(STRANDS, STRANDCNT, 200, 10000);
+  //rainbows(STRANDS, STRANDCNT, 1, 0);
+  Serial.println("Render pass");
+  fweffects->Render();
+  delay(50);
 }

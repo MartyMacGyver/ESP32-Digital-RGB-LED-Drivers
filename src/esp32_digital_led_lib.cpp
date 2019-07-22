@@ -34,6 +34,7 @@
 
 #include "esp32_digital_led_lib.h"
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -120,6 +121,20 @@ typedef struct {
   rmtPulsePair pulsePairMap[2];
   bool isProcessing;
 } digitalLeds_stateData;
+
+double randDouble()
+{
+  return double(esp_random()>>16) / (UINT16_MAX + 1);
+}
+
+pixelColor_t adjustByUniformFactor(pixelColor_t * color, double adjFactor) {
+  color->r = uint8_t(color->r * (1.0 - adjFactor));
+  color->g = uint8_t(color->g * (1.0 - adjFactor));
+  color->b = uint8_t(color->b * (1.0 - adjFactor));
+  color->w = uint8_t(color->w * (1.0 - adjFactor));
+  return *color;
+}
+
 
 const static int MAX_RMT_CHANNELS = 8;
 static strand_t * strandDataPtrs[MAX_RMT_CHANNELS] = {nullptr};  // Indexed by RMT channel

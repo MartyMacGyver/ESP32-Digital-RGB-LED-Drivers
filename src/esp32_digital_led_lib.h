@@ -45,9 +45,9 @@ extern "C" {
 
 typedef union {
   struct __attribute__ ((packed)) {
-    uint8_t r, g, b, w;
+    uint8_t b, g, r, w;  // Little-endian ordered
   };
-  uint32_t num;
+  uint32_t raw32;
 } pixelColor_t;
 
 inline pixelColor_t pixelFromRGB(uint8_t r, uint8_t g, uint8_t b)
@@ -60,8 +60,29 @@ inline pixelColor_t pixelFromRGB(uint8_t r, uint8_t g, uint8_t b)
   return v;
 }
 
+inline pixelColor_t pixelFromRGBhex(uint8_t r, uint8_t g, uint8_t b)
+{
+  pixelColor_t v;
+  v.r = r;
+  v.g = g;
+  v.b = b;
+  v.w = 0;
+  return v;
+}
+
 inline pixelColor_t pixelFromRGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w)
 {
+  pixelColor_t v;
+  v.r = r;
+  v.g = g;
+  v.b = b;
+  v.w = w;
+  return v;
+}
+
+inline pixelColor_t pixelFromRGBWhex(uint8_t r, uint8_t g, uint8_t b, uint8_t w)
+{
+  // The value is of the form 0xWWRRGGBB
   pixelColor_t v;
   v.r = r;
   v.g = g;
@@ -115,6 +136,8 @@ const ledParams_t ledParamsAll[] = {  // Still must match order of `led_types`
 
 extern void espPinMode(int pinNum, int pinDir);
 extern void gpioSetup(int gpioNum, int gpioMode, int gpioVal);
+extern double randDouble();
+extern pixelColor_t adjustByUniformFactor(pixelColor_t * color, double adjFactor);
 
 extern int digitalLeds_initDriver();
 extern int digitalLeds_addStrands(strand_t * strands [], int numStrands);

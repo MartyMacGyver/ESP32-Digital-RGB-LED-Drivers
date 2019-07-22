@@ -28,8 +28,6 @@
  * THE SOFTWARE.
  */
 
-#include "esp32_digital_led_lib.h"
-#include "esp32_digital_led_funcs.h"
 
 #if defined(ARDUINO) && ARDUINO >= 100
   // No extras
@@ -38,6 +36,10 @@
 #elif defined(ESP_PLATFORM)
   #include "arduinoish.hpp"
 #endif
+
+#include "esp32_digital_led_lib.h"
+#include "esp32_digital_led_funcs.h"
+#include "fireworks_effects.h"
 
 
 #define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
