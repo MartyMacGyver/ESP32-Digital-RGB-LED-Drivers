@@ -45,46 +45,34 @@
 #define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 
 
-// All drawing is done in Render, which produces one 
-// frame by calling the draw methods on the supplied
-// graphics interface.  As long as you support "Draw 
-// a pixel" you should be able to make it work with
-// whatever mechanism to plot pixels that you're using...
-
 FireworksEffects::GraphicsStub::GraphicsStub(strand_t * pStrand) {
   StrandPtr = pStrand;
   DotCount = StrandPtr->numPixels;
 }
 
+
 void FireworksEffects::GraphicsStub::FillSolid(uint32_t cval) {
-  Serial.println("Clearing");
   strand_t * strands [] = { StrandPtr };
   digitalLeds_resetPixels(strands, 1);
 }
 
+
 void FireworksEffects::GraphicsStub::SetPixels(double pos, int width, pixelColor_t c) {
   for (int i = -width/2; i <= width/2; i++) {
-    Serial.print("Setting ");
-    Serial.print(pos+i);
-    Serial.print(" to color ");
-    Serial.println(c.raw32, HEX);
     if (pos+i >= 0 && pos+i < DotCount) {
       StrandPtr->pixels[int(pos+i)] = c;
     }
   }
 }
 
+
 void FireworksEffects::GraphicsStub::RefreshPixels() {
-  Serial.println("Refreshing");
   strand_t * strands [] = { StrandPtr };
   digitalLeds_drawPixels(strands, 1);
 }
 
-// Each particle in the particle system remembers its color, 
-// birth time, postion, velocity, etc.  If you are not using DateTime,
-// all you need in its place is a fractional number of seconds elapsed, which is
-// all I use it for.  So timer()/1000.0 or whatever should suffice as well.
 
+// Each particle in the particle system remembers its color, birth time, postion, velocity, etc.
 FireworksEffects::Particle::Particle(pixelColor_t * starColor, double pos, double maxSpeed)
 {
   _position = pos;
@@ -94,10 +82,12 @@ FireworksEffects::Particle::Particle(pixelColor_t * starColor, double pos, doubl
   _lastUpdate = _birthTime;
 }
 
+
 double FireworksEffects::Particle::Age()
 {
   return (millis() - _birthTime) / 1000.0;
 }
+
 
 void FireworksEffects::Particle::Update()
 {
@@ -109,10 +99,12 @@ void FireworksEffects::Particle::Update()
   _starColor = adjustByUniformFactor(&_starColor, randDouble() * 0.1);
 }
 
+
 FireworksEffects::FireworksEffects(strand_t * pStrand)
 {
   graphics = new GraphicsStub(pStrand);
 }
+
 
 void FireworksEffects::Render()
 {
@@ -120,14 +112,13 @@ void FireworksEffects::Render()
     // to the size of the display so that the display size can change and 
     // the "effect density" will stay the same
 
-    Serial.println(graphics->DotCount);
-    const int s1 = 20; //50;
-    const int s2 = 4; //10;
-    const int s3 = 2; //3;
+    const int min_width = 10;
+    const int max_width = 50;
+    const int max_speed_multiplier = 3.0;
     
-    for (int iPass = 0; iPass < graphics->DotCount / s1; iPass++)
+    for (int iPass = 0; iPass < graphics->DotCount / max_width; iPass++)
     {
-        if (randDouble() < NewParticleProbability)
+        if (randDouble() < NewParticleProbability && _Particles.size() == 0)
         {
             // Pick a random color and location.  
             // If you don't have FastLED palettes, all you need to do
@@ -136,12 +127,12 @@ void FireworksEffects::Render()
             int iStartPos = (int)(randDouble() * graphics->DotCount);
             pixelColor_t color;
             color.raw32 = colorChoices[int(randDouble() * COUNT_OF(colorChoices))];
-            int c = int(randDouble() * (s1-s2) + s2);
-            double multiplier = randDouble() * s3;
+            int c = int(randDouble() * (max_width - min_width) + min_width);
+            double speed_multiplier = randDouble() * MaxSpeed * max_speed_multiplier;
 
             for (int i = 1; i < c; i++)
             {
-                Particle particle(&color, iStartPos, MaxSpeed * randDouble() * multiplier);
+                Particle particle(&color, iStartPos, randDouble() * speed_multiplier);
                 _Particles.push_back(particle);
             }
         }
@@ -151,12 +142,11 @@ void FireworksEffects::Render()
     // we need to set a pseudo-realistic upper bound, and the very number of     
     // possible pixels seems like a reasonable one
 
-    while (_Particles.size() > graphics->DotCount)
-        _Particles.pop_front();
+    while (_Particles.size() > graphics->DotCount) {
+      _Particles.pop_front();
+    }
+    graphics->FillSolid(0x00000000); // This is hacky
 
-    // Start out with an empty canvas
-
-    //graphics->FillSolid(0x00000000);
     for (int i = 0; i < _Particles.size(); i++)
     {
         Particle * star = &(_Particles[i]);
@@ -164,27 +154,18 @@ void FireworksEffects::Render()
 
         pixelColor_t c;
         c.raw32 = (star->_starColor).raw32;
+        double fade = 0.0;
 
         // If the star is brand new, it flashes white briefly.  
         // Otherwise it just fades over time.
-
-        double fade = 0.0;
-        Serial.print("AGE: ");
-        Serial.print(star->Age());
-        Serial.print("  ");
-        Serial.print(ParticlePreignitonTime);
-        Serial.print("  ");
-        Serial.print(ParticleIgnition);
-        Serial.println();
         if (star->Age() > ParticlePreignitonTime && star->Age() < (ParticleIgnition + ParticlePreignitonTime))
         {
-            c = pixelFromRGBW(0x3F, 0x3F, 0x3F, 0x00);
+            c = pixelFromRGBW(0x3F, 0x3F, 0x3F, 0x3F);
         }
         else
         {
             // Figure out how much to fade and shrink the star based on 
             // its age relative to its lifetime
-
             double age = star->Age();
             if (age < ParticlePreignitonTime) {
                 fade = 1.0 - (age / ParticlePreignitonTime);
@@ -204,18 +185,12 @@ void FireworksEffects::Render()
                 }
             }
             if (c.raw32 > 0) {
-              Serial.print("Fading color ");
-              Serial.print(c.raw32, HEX);
-              Serial.print(" by ");
-              Serial.println(fade);
               c = adjustByUniformFactor(&c, fade);
-              Serial.print("Faded color ");
-              Serial.println(c.raw32, HEX);
             }
         }
-        ParticleSize = (1 - fade) * 5;
+        ParticleSize = (1 - fade) * 5.0;
 
-        // Because I support antialiasing and partial pixels, this takes a
+        // Because (the original) supports antialiasing and partial pixels, this takes a
         // non-integer number of pixels to draw.  But if you just made it
         // plot 'ParticleSize' pixels in int form, you'd be 99% of the way there
 
@@ -223,9 +198,7 @@ void FireworksEffects::Render()
     }
 
     // Remove any particles who have completed their lifespan
-
-    while (!_Particles.empty() && _Particles.front().Age() > 
-                ParticleHoldTime +  ParticleIgnition + ParticleFadeTime)
+    while (!_Particles.empty() && _Particles.front().Age() > ParticleHoldTime + ParticleIgnition + ParticleFadeTime)
     {
         _Particles.pop_front();
     }
@@ -233,4 +206,5 @@ void FireworksEffects::Render()
     graphics->RefreshPixels();
 }
 
-//};
+
+//eof

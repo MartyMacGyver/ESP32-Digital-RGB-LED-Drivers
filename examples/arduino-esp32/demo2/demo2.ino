@@ -78,25 +78,15 @@ void setup()
   digitalLeds_resetPixels(STRANDS, STRANDCNT);
 
   fweffects = new FireworksEffects(&strand);
-
-  
-//  pixelColor_t ct;
-//  ct = pixelFromRGB(0x12, 0x34, 0x56);
-//  Serial.println(ct.raw32, HEX);
-//  ct = pixelFromRGBW(0x12, 0x34, 0x56, 0x78);
-//  Serial.println(ct.raw32, HEX);
-//  while (true) {
-//    delay(1000);
-//  }
 }
+
 
 //**************************************************************************//
 void loop()
 {
   // simpleStepper(STRANDS, STRANDCNT, 0, 0);
   // randomStrands(STRANDS, STRANDCNT, 200, 10000);
-  //rainbows(STRANDS, STRANDCNT, 1, 0);
-  Serial.println("Render pass");
+  // rainbows(STRANDS, STRANDCNT, 1, 0);
+  Serial.println("Rendering");
   fweffects->Render();
-  delay(50);
 }

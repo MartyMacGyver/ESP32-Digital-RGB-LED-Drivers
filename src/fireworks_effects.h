@@ -78,7 +78,7 @@ class FireworksEffects {
     GraphicsStub * graphics;
     std::deque <Particle> _Particles;   // FIFO particles
     double MaxSpeed                  = 375.0;  // Max velocity
-    double NewParticleProbability    =  0.01;  // Odds of new particle
+    double NewParticleProbability    =   0.1;  // Odds of new particle
     double ParticlePreignitonTime    =   0.0;  // How long to "wink"
     double ParticleIgnition          =   0.2;  // How long to "flash"
     double ParticleHoldTime          =   0.0;  // Main lifecycle time
