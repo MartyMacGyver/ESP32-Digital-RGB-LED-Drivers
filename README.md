@@ -22,6 +22,10 @@ Timings for a given LED type can vary even within that line: use the version var
 
 ### ESP-IDF build notes - Important!
 
+*The ESP-IDF version is WIP right now.* The ESP-IDF varies so regularly and so significantly it's more difficult to keep up with it, versus the abstracted Arduino-ESP32 interfaces. I'm working on making it buildable with v3.2.2 and later sub-versions.
+
+While the Arduino-ESP32 side is my main focus, the ESP-IDF build is actually very similar but more manual (demo*.ino --> main.cpp, and the header and source libs aren't in their canonical locations by default). Beyond convenience, there was no real value in maintaining duplicate copies of the code and libraries as I did previously (and symlinks in the repo are specifically disallowed in Arduino). That said, I'm working on at least having the main sample demo working for the IDF side.
+
 There are ESP-IDF SDK settings that need to be changed to equal the Arduino-ESP32 defaults. The `Tick Rate` and `CPU Frequency` need to be adjusted, otherwise the ESP-IDF build will run significantly more slowly.
 
 Please see the `sdkconfig.defaults` file for details. If you run `make menuconfig` or `make sdkconfig` this file will be parsed for initial settings ONLY if `sdkconfig` doesn't exist. However, this file will be processed every time you run `make defconfig`.
