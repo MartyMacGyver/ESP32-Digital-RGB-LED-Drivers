@@ -34,7 +34,7 @@
 #elif defined(ARDUINO) // pre-1.0
   // No extras
 #elif defined(ESP_PLATFORM)
-  #include "arduinoish.hpp"
+  #include "../../main/arduinoish.hpp"
 #endif
 
 #include "esp32_digital_led_lib.h"
@@ -293,3 +293,6 @@ void rainbow(strand_t * pStrand, unsigned long delay_ms, unsigned long timeout_m
   strand_t * strands [] = { pStrand };
   rainbows(strands, 1, delay_ms, timeout_ms);
 }
+
+
+//**************************************************************************//

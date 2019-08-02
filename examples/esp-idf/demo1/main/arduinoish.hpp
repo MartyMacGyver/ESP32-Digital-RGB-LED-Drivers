@@ -45,8 +45,10 @@
 
   #define HIGH 1
   #define LOW 0
-  #define OUTPUT GPIO_MODE_OUTPUT
-  #define INPUT GPIO_MODE_INPUT
+  //#define OUTPUT GPIO_MODE_OUTPUT
+  //#define INPUT GPIO_MODE_INPUT
+  #define INPUT             0x01
+  #define OUTPUT            0x02
 
   #define DEC 10
   #define HEX 16

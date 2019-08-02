@@ -34,7 +34,7 @@
 #elif defined(ARDUINO) // pre-1.0
   // No extras
 #elif defined(ESP_PLATFORM)
-  #include "arduinoish.hpp"
+  #include "../../main/arduinoish.hpp"
 #endif
 
 #include "esp32_digital_led_lib.h"
@@ -207,4 +207,4 @@ void FireworksEffects::Render()
 }
 
 
-//eof
+//**************************************************************************//

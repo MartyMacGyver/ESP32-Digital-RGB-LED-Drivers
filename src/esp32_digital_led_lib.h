@@ -150,3 +150,6 @@ extern int digitalLeds_resetPixels(strand_t * strands [], int numStrands);
 #endif
 
 #endif /* ESP32_DIGITAL_LED_LIB_H */
+
+
+//**************************************************************************//

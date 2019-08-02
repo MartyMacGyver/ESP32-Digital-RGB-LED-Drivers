@@ -103,7 +103,7 @@ int getMaxMalloc(int min_mem, int max_mem) {
 //    Serial.print(" bytes --> pointer 0x");
 //    Serial.println((uintptr_t)foo1, HEX);
     if (foo1 == nullptr) {  // Back off
-      max_mem = min(curr_size, max_mem);
+      max_mem = std::min(curr_size, max_mem);
 //      Serial.print("checkmem: backoff 2 prev = ");
 //      Serial.print(prev_size);
 //      Serial.print(", curr = ");
@@ -122,7 +122,7 @@ int getMaxMalloc(int min_mem, int max_mem) {
       free(foo1);
       max_free = curr_size;
       prev_size = curr_size;
-      curr_size = min(curr_size * 2, max_mem);
+      curr_size = std::min(curr_size * 2, max_mem);
 //      Serial.print("checkmem: advance 2 prev = ");
 //      Serial.print(prev_size);
 //      Serial.print(", curr = ");
@@ -168,7 +168,7 @@ void dumpDebugBuffer(int id, char * debugBuffer)
 
 
 //**************************************************************************//
-boolean initStrands()
+bool initStrands()
 {
   /****************************************************************************
      If you have multiple strands connected, but not all are in use, the

@@ -10,7 +10,9 @@
 #-----------------------------------------------------------------------------
 # Menu: Serial flasher config --> Default serial port
 # CONFIG_ESPTOOLPY_PORT="/dev/ttyUSB0"
-CONFIG_ESPTOOLPY_PORT="COM17"
+CONFIG_ESPTOOLPY_PORT="COM16"
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+CONFIG_ESPTOOLPY_FLASHFREQ="80m"
 
 #-----------------------------------------------------------------------------
 # Menu: Component config --> ESP32-specific --> CPU frequency
