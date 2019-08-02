@@ -57,10 +57,21 @@
 
 strand_t STRANDS[] = { // Avoid using any of the strapping pins on the ESP32, anything >=32, 16, 17... not much left.
 //  {.rmtChannel = 0, .gpioNum = 14, .ledType = LED_SK6812W_V1, .brightLimit = 24, .numPixels =  144},
-  {.rmtChannel = 0, .gpioNum = 14, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  93},
-  {.rmtChannel = 1, .gpioNum = 15, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  93},
-  {.rmtChannel = 2, .gpioNum = 26, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  93},
-  {.rmtChannel = 3, .gpioNum = 27, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  93},
+
+//  {.rmtChannel = 0, .gpioNum = 14, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  93},
+//  {.rmtChannel = 1, .gpioNum = 15, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  93},
+//  {.rmtChannel = 2, .gpioNum = 26, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  93},
+//  {.rmtChannel = 3, .gpioNum = 27, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  93},
+
+  {.rmtChannel = 0, .gpioNum = 13, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  320},
+  {.rmtChannel = 1, .gpioNum = 14, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  320},
+  {.rmtChannel = 2, .gpioNum = 15, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  320},
+  {.rmtChannel = 3, .gpioNum = 16, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  320},
+  {.rmtChannel = 4, .gpioNum = 17, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  320},
+  {.rmtChannel = 5, .gpioNum = 18, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  320},
+  {.rmtChannel = 6, .gpioNum = 21, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  320},
+  {.rmtChannel = 7, .gpioNum = 22, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  320},
+
 //  {.rmtChannel = 3, .gpioNum = 19, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels =  64},
 //  {.rmtChannel = 0, .gpioNum = 16, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels = 256},
 //  {.rmtChannel = 0, .gpioNum = 16, .ledType = LED_SK6812W_V1, .brightLimit = 32, .numPixels = 300},
@@ -232,6 +243,8 @@ void loop()
   for (int i = 0; i < STRANDCNT; i++) {
     strands[i] = &STRANDS[i];
   }
+
+  digitalLeds_resetPixels(strands, STRANDCNT);
 
   int m1 = getMaxMalloc(1*1024, 16*1024*1024);
 
